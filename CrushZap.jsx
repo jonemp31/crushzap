@@ -34,11 +34,29 @@ const GLOBAL_CSS = `
   }
 `;
 
+// ── Persistência de sessão (sobrevive a refresh / fechar a aba) ──
+// Versionado: ao mudar a estrutura dos dados, suba STATE_KEY para _v2 (descarta o estado antigo)
+const STATE_KEY = "cz_state_v1";
+
+let _initialState; // cache: lê o localStorage uma única vez por carregamento
+function getInitialState() {
+  if (_initialState !== undefined) return _initialState;
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    _initialState = (parsed && Array.isArray(parsed.conversations)) ? parsed : null;
+  } catch {
+    _initialState = null;
+  }
+  return _initialState;
+}
+
 export default function CrushZap() {
-  const [activeTab, setActiveTab] = useState("chats");
-  const [activeConv, setActiveConv] = useState(null);
-  const [conversations, setConversations] = useState(initConversations);
-  const [visitedChats, setVisitedChats] = useState(new Set(["jonatan"]));
+  const saved = getInitialState();
+  const [activeTab, setActiveTab] = useState(() => saved?.activeTab ?? "chats");
+  const [activeConv, setActiveConv] = useState(() => saved?.activeConv ?? null);
+  const [conversations, setConversations] = useState(() => saved?.conversations ?? initConversations());
+  const [visitedChats, setVisitedChats] = useState(() => new Set(saved?.visitedChats ?? ["jonatan"]));
   const [geoData, setGeoData] = useState(null);
   const [purchasedChannels, setPurchasedChannels] = useState(() => {
     try { return JSON.parse(localStorage.getItem("crushzap_access") || "{}"); }
@@ -46,7 +64,8 @@ export default function CrushZap() {
   });
   const [tutorialStep, setTutorialStep] = useState(null);
 
-  const activeConvRef = useRef(null);
+  // Inicializa o ref já com a conversa restaurada (senão unread/som tratariam o chat aberto como inativo)
+  const activeConvRef = useRef(saved?.activeConv ?? null);
   const notifTimestamps = useRef([]);
   const tutorialTimers = useRef([]);
   const totalUnread = conversations.reduce((a, c) => a + c.unread, 0);
@@ -89,6 +108,18 @@ export default function CrushZap() {
           .catch(() => setGeo("", "", "", ""));
       });
   }, []);
+
+  // Persiste o estado durável. Transitório (showCall/isTyping/tutorialStep) fica de fora de propósito.
+  useEffect(() => {
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify({
+        conversations,
+        visitedChats: [...visitedChats],
+        activeTab,
+        activeConv,
+      }));
+    } catch {}
+  }, [conversations, visitedChats, activeTab, activeConv]);
 
   const openChat = (id) => {
     setVisitedChats(prev => new Set([...prev, id]));
