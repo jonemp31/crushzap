@@ -1,0 +1,42 @@
+﻿export const T = {
+  bg: "#ffffff",
+  headerBg: "#ffffff",
+  chatHeaderBg: "#008069",
+  chatBg: "#efeae2",
+  bubbleSent: "#d9fdd3",
+  bubbleReceived: "#ffffff",
+  textPrimary: "#111b21",
+  textSecondary: "#667781",
+  inputBg: "#f0f2f5",
+  borderColor: "#f0f2f5",
+  searchBg: "#f0f2f5",
+  unreadBadge: "#25d366",
+  green: "#008069",
+  composerBg: "#f0f2f5",
+  fabBg: "#00a884",
+};
+
+export const AVATARS = {
+  duda:     "https://s3files.autopilots.trade/crushzap/fotoschats/mariaeduada.jpg",
+  numero:   "https://s3files.autopilots.trade/crushzap/fotoschats/p1.jpg",
+  davi:     "https://s3files.autopilots.trade/crushzap/fotoschats/9.png",
+  isa:      "https://s3files.autopilots.trade/crushzap/fotoschats/8.png",
+  mohamed:  "https://s3files.autopilots.trade/crushzap/fotoschats/7.png",
+  eduardo:  "https://s3files.autopilots.trade/crushzap/fotoschats/6.png",
+  lucas:    "https://s3files.autopilots.trade/crushzap/fotoschats/5.png",
+  camila:   "https://s3files.autopilots.trade/crushzap/fotoschats/4.png",
+  fernanda: "https://s3files.autopilots.trade/crushzap/fotoschats/3.png",
+  beatriz:  "https://s3files.autopilots.trade/crushzap/fotoschats/2.png",
+  amanda:   "https://s3files.autopilots.trade/crushzap/fotoschats/19.png",
+  carolina: "https://s3files.autopilots.trade/crushzap/fotoschats/18.png",
+  gabriela: "https://s3files.autopilots.trade/crushzap/fotoschats/17.png",
+  isabela:  "https://s3files.autopilots.trade/crushzap/fotoschats/16.png",
+  natalia:  "https://s3files.autopilots.trade/crushzap/fotoschats/14.png",
+  rafaela:  "https://s3files.autopilots.trade/crushzap/fotoschats/13.png",
+  vanessa:  "https://s3files.autopilots.trade/crushzap/fotoschats/12.png",
+  priscila: "https://s3files.autopilots.trade/crushzap/fotoschats/11.png",
+  tatiane:  "https://s3files.autopilots.trade/crushzap/fotoschats/10.png",
+  renata:   "https://s3files.autopilots.trade/crushzap/fotoschats/nova.jpg",
+};
+
+export const wallpaperSvg = `url("https://s3files.autopilots.trade/crushzap/fundowpp.png")`;
