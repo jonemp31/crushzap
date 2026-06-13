@@ -51,12 +51,36 @@ function getInitialState() {
   return _initialState;
 }
 
+// ── Deep link: abre direto num chat via /slug ou ?chat=slug ──
+const CHAT_SLUGS = { yasmin: "duda" };
+
+let _deepLinkConv; // cache: lê a URL uma única vez por carregamento
+function getDeepLinkConv() {
+  if (_deepLinkConv !== undefined) return _deepLinkConv;
+  try {
+    const fromQuery = (new URLSearchParams(window.location.search).get("chat") || "").toLowerCase();
+    const fromPath  = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0].toLowerCase();
+    _deepLinkConv = CHAT_SLUGS[fromQuery || fromPath] || null;
+  } catch {
+    _deepLinkConv = null;
+  }
+  return _deepLinkConv;
+}
+
 export default function CrushZap() {
   const saved = getInitialState();
+  const deepLinkConv = getDeepLinkConv();
+  // Deep link tem prioridade sobre a sessão salva: o anúncio sempre abre no chat alvo
+  const initialConv = deepLinkConv ?? saved?.activeConv ?? null;
+
   const [activeTab, setActiveTab] = useState(() => saved?.activeTab ?? "chats");
-  const [activeConv, setActiveConv] = useState(() => saved?.activeConv ?? null);
+  const [activeConv, setActiveConv] = useState(() => initialConv);
   const [conversations, setConversations] = useState(() => saved?.conversations ?? initConversations());
-  const [visitedChats, setVisitedChats] = useState(() => new Set(saved?.visitedChats ?? ["jonatan"]));
+  const [visitedChats, setVisitedChats] = useState(() => {
+    const base = new Set(saved?.visitedChats ?? ["jonatan"]);
+    if (deepLinkConv) base.add(deepLinkConv);
+    return base;
+  });
   const [geoData, setGeoData] = useState(null);
   const [purchasedChannels, setPurchasedChannels] = useState(() => {
     try { return JSON.parse(localStorage.getItem("crushzap_access") || "{}"); }
@@ -64,8 +88,8 @@ export default function CrushZap() {
   });
   const [tutorialStep, setTutorialStep] = useState(null);
 
-  // Inicializa o ref já com a conversa restaurada (senão unread/som tratariam o chat aberto como inativo)
-  const activeConvRef = useRef(saved?.activeConv ?? null);
+  // Inicializa o ref já com a conversa aberta (senão unread/som tratariam o chat aberto como inativo)
+  const activeConvRef = useRef(initialConv);
   const notifTimestamps = useRef([]);
   const tutorialTimers = useRef([]);
   const totalUnread = conversations.reduce((a, c) => a + c.unread, 0);
@@ -107,6 +131,13 @@ export default function CrushZap() {
           })
           .catch(() => setGeo("", "", "", ""));
       });
+  }, []);
+
+  // Após consumir o deep link, limpa a URL para "/" — assim refresh/back respeitam a sessão salva
+  useEffect(() => {
+    if (deepLinkConv) {
+      try { window.history.replaceState({}, "", "/"); } catch {}
+    }
   }, []);
 
   // Persiste o estado durável. Transitório (showCall/isTyping/tutorialStep) fica de fora de propósito.
