@@ -9,6 +9,9 @@ dist-ssr/
 *.log
 npm-debug.log*
 
+# Data exports (não versionar — podem conter dados de leads)
+*.csv
+
 # Editor / OS
 .vscode/
 .idea/
