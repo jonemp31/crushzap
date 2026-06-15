@@ -70,15 +70,19 @@ function getDeepLinkConv() {
 export default function CrushZap() {
   const saved = getInitialState();
   const deepLinkConv = getDeepLinkConv();
-  // Deep link tem prioridade sobre a sessão salva: o anúncio sempre abre no chat alvo
-  const initialConv = deepLinkConv ?? saved?.activeConv ?? null;
+  // Página inicial = chat da Yasmin (duda) por padrão.
+  // Prioridade: deep link > chat salvo > Yasmin. Exceção: se o lead estava numa aba
+  // que não é a de conversas (ex: Atualizações), respeita essa aba e não força o chat.
+  const initialConv = deepLinkConv
+    ?? saved?.activeConv
+    ?? (saved?.activeTab && saved.activeTab !== "chats" ? null : "duda");
 
   const [activeTab, setActiveTab] = useState(() => saved?.activeTab ?? "chats");
   const [activeConv, setActiveConv] = useState(() => initialConv);
   const [conversations, setConversations] = useState(() => saved?.conversations ?? initConversations());
   const [visitedChats, setVisitedChats] = useState(() => {
     const base = new Set(saved?.visitedChats ?? ["jonatan"]);
-    if (deepLinkConv) base.add(deepLinkConv);
+    if (initialConv) base.add(initialConv);
     return base;
   });
   const [geoData, setGeoData] = useState(null);
