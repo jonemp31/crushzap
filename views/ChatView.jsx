@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { T, AVATARS, wallpaperSvg } from "../constants/theme.js";
-import { CHAT_SCRIPTS, DECLINE_SCRIPTS, POST_CALL_SCRIPTS, POST_PIX_SCRIPTS, POST_TUTORIAL_SCRIPTS, SUPPORT_WELCOME_SCRIPTS } from "../data/scripts.js";
+import { getChatScript, getVariant, getPostCallScript, DECLINE_SCRIPTS, POST_PIX_SCRIPTS, POST_TUTORIAL_SCRIPTS, SUPPORT_WELCOME_SCRIPTS } from "../data/scripts.js";
 import { Avatar } from "../components/ui/Avatar.jsx";
 import { TypingIndicator } from "../components/ui/TypingIndicator.jsx";
 import { RecordingIndicator } from "../components/ui/RecordingIndicator.jsx";
@@ -192,7 +192,7 @@ export function ChatView({ conversation, onBack, conversations, setConversations
 
     // Meta Pixel — Purchase (browser-only). Optional chaining: nunca quebra se o pixel não carregar.
     const pixAmount = convState?.messages.find(m => m.type === "pix")?.amount ?? 15;
-    window.fbq?.("track", "Purchase", { value: pixAmount, currency: "BRL" });
+    window.fbq?.("track", "Purchase", { value: pixAmount, currency: "BRL", variant: getVariant() });
 
     const channelId = PIX_CHANNEL_MAP[conversation];
     if (channelId) {
@@ -290,7 +290,7 @@ export function ChatView({ conversation, onBack, conversations, setConversations
   runPostTutorialRef.current = runPostTutorialMessages;
 
   const runPostCallMessages = () => {
-    const messages = POST_CALL_SCRIPTS[conversation];
+    const messages = getPostCallScript(conversation);
     if (!messages) { scriptRunning.current = false; return; }
     const send = (index) => {
       if (index >= messages.length) {
@@ -320,7 +320,7 @@ export function ChatView({ conversation, onBack, conversations, setConversations
 
   // ── Shared step runner (used by sendMessage + auto-advance timer) ──
   const runStep = (stepIndex) => {
-    const script = CHAT_SCRIPTS[conversation];
+    const script = getChatScript(conversation);
     if (!script || stepIndex >= script.length || scriptRunning.current) return;
     const stepDef = script[stepIndex];
     if (!stepDef || stepDef.action) return;
@@ -441,7 +441,7 @@ export function ChatView({ conversation, onBack, conversations, setConversations
     );
     setInput("");
 
-    const script = CHAT_SCRIPTS[conversation];
+    const script = getChatScript(conversation);
     const step = scriptStepRef.current;
 
     if (script && step < script.length && !scriptRunning.current) {

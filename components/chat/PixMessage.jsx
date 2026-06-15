@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { getVariant } from "../../data/scripts.js";
 
 const API_CREATE  = "https://webdurov.autopilots.trade/webhook/asaas-pay";
 const API_CONSULT = "https://webdurov.autopilots.trade/webhook/asaas-consulta";
@@ -206,7 +207,7 @@ export function PixMessage({ msg, contactPhoto, contactName, onPaid, savedTx, on
       const r = await fetch(API_CREATE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, description, external_id: `cz-${Date.now()}` }),
+        body: JSON.stringify({ amount, description, external_id: `cz-${getVariant()}-${Date.now()}` }),
       });
       const data = await r.json();
       if (data.success && data.transaction) {

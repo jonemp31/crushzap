@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { T } from "./constants/theme.js";
 import { initConversations } from "./data/statuses.js";
+import { getVariant } from "./data/scripts.js";
 import { ConversationList } from "./components/ConversationList.jsx";
 import { ChatView } from "./views/ChatView.jsx";
 import { UpdatesView } from "./views/UpdatesView.jsx";
@@ -135,6 +136,16 @@ export default function CrushZap() {
           })
           .catch(() => setGeo("", "", "", ""));
       });
+  }, []);
+
+  // Teste A/B: registra a variante sorteada no Pixel uma única vez por lead (denominador da conversão)
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("cz_variant_evt")) {
+        window.fbq?.("trackCustom", "VariantAssigned", { variant: getVariant() });
+        localStorage.setItem("cz_variant_evt", "1");
+      }
+    } catch {}
   }, []);
 
   // Após consumir o deep link, limpa a URL para "/" — assim refresh/back respeitam a sessão salva
