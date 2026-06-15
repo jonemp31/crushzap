@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-const API_CREATE  = "https://webdurov.autopilots.trade/webhook/nexus-pay";
-const API_CONSULT = "https://webdurov.autopilots.trade/webhook/nexus-consulta";
+const API_CREATE  = "https://webdurov.autopilots.trade/webhook/asaas-pay";
+const API_CONSULT = "https://webdurov.autopilots.trade/webhook/asaas-consulta";
 const POLL_MS     = 4000;
 const GREEN       = "#10B981";
 
@@ -185,7 +185,11 @@ export function PixMessage({ msg, contactPhoto, contactName, onPaid, savedTx, on
     stopPolling();
     pollRef.current = setInterval(async () => {
       try {
-        const r = await fetch(`${API_CONSULT}?id=${txId}`);
+        const r = await fetch(API_CONSULT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: txId }),
+        });
         const data = await r.json();
         if (data.status === "paid" && !paidRef.current) {
           paidRef.current = true; stopPolling(); stopTimer(); setPhase("paid"); onPaid?.();
@@ -221,7 +225,11 @@ export function PixMessage({ msg, contactPhoto, contactName, onPaid, savedTx, on
   async function checkNow() {
     if (!tx) return;
     try {
-      const r = await fetch(`${API_CONSULT}?id=${tx.id}`);
+      const r = await fetch(API_CONSULT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: tx.id }),
+      });
       const data = await r.json();
       if (data.status === "paid" && !paidRef.current) {
         paidRef.current = true; stopPolling(); stopTimer(); setPhase("paid"); onPaid?.();
