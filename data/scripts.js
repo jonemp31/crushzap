@@ -229,14 +229,15 @@ export const CHAT_SCRIPTS = {
   ],
 };
 
-// ── Teste A/B de copy: sorteio 50/50 no 1º acesso, travado por lead ──
+// ── Teste A/B/C de copy: sorteio 33/33/33 no 1º acesso, travado por lead ──
 let _variant;
 export function getVariant() {
   if (_variant) return _variant;
   try {
     let v = localStorage.getItem("cz_variant");
-    if (v !== "A" && v !== "B") {
-      v = Math.random() < 0.5 ? "A" : "B";
+    if (v !== "A" && v !== "B" && v !== "C") {
+      const r = Math.random();
+      v = r < 1 / 3 ? "A" : r < 2 / 3 ? "B" : "C";
       localStorage.setItem("cz_variant", v);
     }
     _variant = v;
@@ -327,7 +328,54 @@ CHAT_SCRIPTS.duda_B = [
   },
 ];
 
-// Resolve o script da conversa, aplicando a variante A/B só na Yasmin (duda)
+// ── Variante C do funil da Yasmin (copy 3) — curta/direta, PIX R$15,02 ──
+CHAT_SCRIPTS.duda_C = [
+  {
+    // Step 0: saudação carente
+    messages: [
+      { text: "oi amor 🙈" },
+      { text: "que bom que vc apareceu," },
+      { text: "tava morrendo de tédio e com vontade aqui rs" },
+      { text: "tudo bem gatinho?" },
+    ],
+  },
+  {
+    // Step 1: prova (foto cedo) + já puxa a ligação
+    messages: [
+      { text: "deixa eu já te mostrar com quem vc tá falando 😏" },
+      { image: CHAT_PHOTOS.e6, preDelay: [6, 10] },
+      { text: "sou eu amor ❤️" },
+      { text: "quer me ver ao vivo agora? 🙈" },
+      { text: "posso te ligar?" },
+    ],
+  },
+  {
+    // Step 2: chamada
+    action: "call",
+    delay: 5,
+  },
+  {
+    // Step 3: micro-compromisso (yes-ladder)
+    messages: [
+      { text: "me fala uma coisa... vc tá com vontade igual eu tô? 😏" },
+    ],
+  },
+  {
+    // Step 4: oferta direta → slide → pix (15,02)
+    messages: [
+      { text: "então deixa eu te dar um presente", preDelay: [4, 7] },
+      { text: "vou te mandar todos os meus vídeos e fotos mais quentes 😈", preDelay: [3, 5] },
+      { slideshow: SLIDESHOW_DUDA, preDelay: [3, 5] },
+      { text: "te dou tudo isso amor", preDelay: [3, 5] },
+      { text: "só me ajuda com 15 reais no pix?", preDelay: [5, 8] },
+      { text: "aí eu já te ligo de novo e a gente continua bem gostoso 🙈", preDelay: [3, 5] },
+      { text: "topa? ❤️", preDelay: [3, 5] },
+      { type: "pix", amount: 15.02, description: "Chamada de vídeo ao vivo", preDelay: [1, 1] },
+    ],
+  },
+];
+
+// Resolve o script da conversa, aplicando a variante A/B/C só na Yasmin (duda)
 export function getChatScript(conversation) {
   if (conversation === "duda") return CHAT_SCRIPTS["duda_" + getVariant()];
   return CHAT_SCRIPTS[conversation];
@@ -346,9 +394,14 @@ export const POST_CALL_SCRIPTS = {
     { text: "fiquei até com vergonha rs" },
     { text: "gostou? ❤️" },
   ],
+  duda_C: [
+    { text: "viu que sou real? 🙈" },
+    { text: "fiquei toda arrepiada de te ver rs" },
+    { text: "gostou de mim amor? ❤️" },
+  ],
 };
 
-// Resolve o pós-chamada, aplicando a variante A/B só na Yasmin (duda)
+// Resolve o pós-chamada, aplicando a variante A/B/C só na Yasmin (duda)
 export function getPostCallScript(conversation) {
   if (conversation === "duda") return POST_CALL_SCRIPTS["duda_" + getVariant()];
   return POST_CALL_SCRIPTS[conversation];
