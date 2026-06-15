@@ -52,6 +52,20 @@ function getInitialState() {
   return _initialState;
 }
 
+// ── Auto-start vindo da pressel: ?oi=<mensagem> abre o chat já com o "oi" do lead ──
+let _autoFirst;
+function getAutoFirstMessage() {
+  if (_autoFirst !== undefined) return _autoFirst;
+  try {
+    const raw = new URLSearchParams(window.location.search).get("oi");
+    const t = (raw || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    _autoFirst = t || null;
+  } catch {
+    _autoFirst = null;
+  }
+  return _autoFirst;
+}
+
 // ── Deep link: abre direto num chat via /slug ou ?chat=slug ──
 const CHAT_SLUGS = { yasmin: "duda" };
 
@@ -71,6 +85,7 @@ function getDeepLinkConv() {
 export default function CrushZap() {
   const saved = getInitialState();
   const deepLinkConv = getDeepLinkConv();
+  const autoFirst = getAutoFirstMessage();
   // Página inicial = chat da Yasmin (duda) por padrão.
   // Prioridade: deep link > chat salvo > Yasmin. Exceção: se o lead estava numa aba
   // que não é a de conversas (ex: Atualizações), respeita essa aba e não força o chat.
@@ -148,9 +163,9 @@ export default function CrushZap() {
     } catch {}
   }, []);
 
-  // Após consumir o deep link, limpa a URL para "/" — assim refresh/back respeitam a sessão salva
+  // Após consumir o deep link / ?oi, limpa a URL para "/" — assim refresh/back respeitam a sessão salva
   useEffect(() => {
-    if (deepLinkConv) {
+    if (deepLinkConv || autoFirst) {
       try { window.history.replaceState({}, "", "/"); } catch {}
     }
   }, []);
@@ -226,6 +241,7 @@ export default function CrushZap() {
           playNotifSound={playNotifSound}
           onPurchase={onPurchase}
           onTutorialStart={startTutorial}
+          autoFirstMessage={autoFirst}
         />
         {/* Overlay presente no branch do ChatView para o step 0 */}
         <TutorialOverlay step={tutorialStep} onSkip={skipTutorial} />

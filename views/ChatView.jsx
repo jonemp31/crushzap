@@ -12,7 +12,7 @@ import { VideoCallScreen } from "../components/VideoCallScreen.jsx";
 
 const PIX_CHANNEL_MAP = { duda: "pack" };
 
-export function ChatView({ conversation, onBack, conversations, setConversations, geoData, activeConvRef, playNotifSound, onPurchase, onTutorialStart }) {
+export function ChatView({ conversation, onBack, conversations, setConversations, geoData, activeConvRef, playNotifSound, onPurchase, onTutorialStart, autoFirstMessage }) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -31,6 +31,8 @@ export function ChatView({ conversation, onBack, conversations, setConversations
   const runPostTutorialRef = useRef(null);
   const welcomeFiredRef = useRef(false);
   const runWelcomeRef = useRef(null);
+  const autoFiredRef = useRef(false);
+  const submitRef = useRef(null);
   const conv = conversations.find((c) => c.id === conversation);
   const scriptStepRef = useRef(conv?.scriptStep ?? 0);
   // Avança o contador de forma síncrona (ref) + persiste no estado (closure-safe)
@@ -54,6 +56,19 @@ export function ChatView({ conversation, onBack, conversations, setConversations
       prev.map(c => c.id === conversation ? { ...c, postTutorialPending: false } : c)
     );
     setTimeout(() => runPostTutorialRef.current?.(), 800);
+  }, []);
+
+  // Auto-start do funil (vindo da pressel com ?oi=): injeta o "oi" do lead e a Yasmin já responde
+  useEffect(() => {
+    if (conversation !== "duda" || !autoFirstMessage) return;
+    const convState = conversations.find(c => c.id === conversation);
+    if (convState && convState.messages.length > 0) return; // só lead novo (chat vazio)
+    const t = setTimeout(() => {
+      if (autoFiredRef.current) return; // dispara o "oi" uma única vez
+      autoFiredRef.current = true;
+      submitRef.current?.(autoFirstMessage);
+    }, 500);
+    return () => clearTimeout(t);
   }, []);
 
   // Boas-vindas do canal de suporte (apenas na primeira abertura do chat Crushzap)
@@ -411,8 +426,10 @@ export function ChatView({ conversation, onBack, conversations, setConversations
   // Keep ref always pointing to latest runStep (avoids stale closure in timers)
   runStepRef.current = runStep;
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  // Núcleo de envio de uma mensagem do lead (usado pelo input E pelo auto-start da pressel)
+  const submitMessage = (text) => {
+    const t = (text || "").trim();
+    if (!t) return;
     if (autoCallTimerRef.current) {
       clearTimeout(autoCallTimerRef.current);
       autoCallTimerRef.current = null;
@@ -423,7 +440,7 @@ export function ChatView({ conversation, onBack, conversations, setConversations
     }
     const now = new Date();
     const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    const newMsg = { id: Date.now(), text: input.trim(), sent: true, time: timeStr, read: false };
+    const newMsg = { id: Date.now(), text: t, sent: true, time: timeStr, read: false };
 
     setConversations((prev) =>
       prev.map((c) => {
@@ -436,10 +453,9 @@ export function ChatView({ conversation, onBack, conversations, setConversations
           msgs.push({ id: Date.now() - 1, type: "encryption" });
         }
         msgs.push(newMsg);
-        return { ...c, messages: msgs, lastMsg: input.trim(), time: timeStr };
+        return { ...c, messages: msgs, lastMsg: t, time: timeStr };
       })
     );
-    setInput("");
 
     const script = getChatScript(conversation);
     const step = scriptStepRef.current;
@@ -461,6 +477,16 @@ export function ChatView({ conversation, onBack, conversations, setConversations
 
       runStep(step);
     }
+  };
+
+  // Mantém o ref apontando pro submitMessage atual (evita closure desatualizado no timer do auto-start)
+  submitRef.current = submitMessage;
+
+  const sendMessage = () => {
+    const t = input.trim();
+    if (!t) return;
+    setInput("");
+    submitMessage(t);
   };
 
   if (!conv) return null;

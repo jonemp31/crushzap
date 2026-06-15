@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Conectando...</title>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)
+    }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1651800092776669');
+    fbq('track', 'PageView');
+  </script>
+
+  <!-- Umami -->
+  <script defer src="https://umami.autopilots.trade/script.js" data-website-id="3862ead2-834c-42a9-ada6-9749abc32a54"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+      background: #efeae2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      padding: 24px;
+    }
+    .card {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      max-width: 320px;
+    }
+    .avatar-wrap { position: relative; margin-bottom: 16px; }
+    .avatar {
+      width: 104px; height: 104px; border-radius: 50%;
+      object-fit: cover; display: block;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .online-dot {
+      position: absolute; right: 6px; bottom: 6px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #25D366; border: 3px solid #efeae2;
+    }
+    .name { font-size: 20px; font-weight: 600; color: #111b21; }
+    .status {
+      margin-top: 6px; font-size: 14px; color: #667781;
+      min-height: 20px; display: flex; align-items: center; gap: 6px; justify-content: center;
+    }
+    .typing { display: inline-flex; gap: 4px; align-items: center; }
+    .typing span {
+      width: 6px; height: 6px; border-radius: 50%; background: #25D366;
+      animation: bounce 1.3s infinite ease-in-out;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.18s; }
+    .typing span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+    .sub {
+      margin-top: 22px; font-size: 13px; color: #8696a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="avatar-wrap">
+      <img class="avatar" src="https://s3files.autopilots.trade/crushzap/fotoschats/mariaeduada.jpg" alt="">
+      <div class="online-dot"></div>
+    </div>
+    <div class="name">Yasmin</div>
+    <div class="status" id="status">online agora</div>
+    <div class="sub">Conectando você com a Yasmin...</div>
+  </div>
+
+  <script>
+    function getGreeting() {
+      var h = new Date().getHours();
+      if (h >= 5 && h < 12) return 'bom dia';
+      if (h >= 12 && h < 18) return 'boa tarde';
+      return 'boa noite';
+    }
+    function getRandomMessage() {
+      var g = getGreeting();
+      var msgs = [
+        "Oi " + g, "Oi " + g + " tudo bem", "Oi " + g + " tudo certo", "Oi " + g + " como você está",
+        "Oi " + g + " posso te chamar", "Oi " + g + " vamos conversar", "Oi " + g + " você está online",
+        "Oi " + g + " quero te conhecer", "Oi tudo bem", "Oi pode conversar", "Oi quero te conhecer",
+        "Oi vamos conversar", "Oi gatinha on", "Oi tá disponível", "Oi posso te chamar", "Oi me chama",
+        "Oi tô aqui", "Oi você online", "Oi adorei seu perfil", "Oi vi seu perfil", "Oi quero conversar",
+        "Oi quero saber mais", "Oi me conta sobre você", "Oi posso te conhecer", "Oi tô interessado",
+        "Oi quero te ver", "Oi posso te mandar mensagem", "Oi você está livre agora", "Oi me responde",
+        "Oi vamos nos conhecer", "Oi você é de onde", "Oi posso conversar contigo agora", "Oi me fala de você",
+        "Oi posso te conhecer melhor", "Oi quero bater um papo", "Oi me chama quando puder", "Oi quero muito te conhecer",
+        "Oi adorei sua foto", "Oi você é gatinha sim", "Oi quero muito conversar agora", "Oi você está bem",
+        "Oi você topa conversar", "Oi posso te ligar", "Oi vamos se conhecer melhor", "Oi me manda seu contato",
+        "Oi tô livre pra conversar", "Oi você tem tempo agora", "Oi me dá uma chance de conversar", "Oi posso te conhecer hoje"
+      ];
+      return msgs[Math.floor(Math.random() * msgs.length)];
+    }
+
+    function init() {
+      var inicio = Date.now();
+      var minTempo = 1400; // garante o Pixel + o "digitando" antes de redirecionar
+      var statusEl = document.getElementById('status');
+
+      // após ~600ms, troca "online agora" por "digitando..."
+      setTimeout(function () {
+        statusEl.innerHTML = 'digitando<span class="typing"><span></span><span></span><span></span></span>';
+      }, 600);
+
+      var msg = getRandomMessage();
+      var restante = Math.max(0, minTempo - (Date.now() - inicio));
+      setTimeout(function () {
+        window.location.replace("/yasmin?oi=" + encodeURIComponent(msg));
+      }, restante);
+    }
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
