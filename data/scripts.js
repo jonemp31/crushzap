@@ -229,15 +229,15 @@ export const CHAT_SCRIPTS = {
   ],
 };
 
-// ── Teste A/B/C de copy: sorteio 33/33/33 no 1º acesso, travado por lead ──
+// ── Teste A/B/C/D/E de copy: sorteio 20% cada no 1º acesso, travado por lead ──
+const VARIANTS = ["A", "B", "C", "D", "E"];
 let _variant;
 export function getVariant() {
   if (_variant) return _variant;
   try {
     let v = localStorage.getItem("cz_variant");
-    if (v !== "A" && v !== "B" && v !== "C") {
-      const r = Math.random();
-      v = r < 1 / 3 ? "A" : r < 2 / 3 ? "B" : "C";
+    if (!VARIANTS.includes(v)) {
+      v = VARIANTS[Math.floor(Math.random() * VARIANTS.length)];
       localStorage.setItem("cz_variant", v);
     }
     _variant = v;
@@ -375,7 +375,65 @@ CHAT_SCRIPTS.duda_C = [
   },
 ];
 
-// Resolve o script da conversa, aplicando a variante A/B/C só na Yasmin (duda)
+// ── Variante D do funil da Yasmin (copy 4) — guiada por dados, fecho anti-objeção, PIX R$15,03 ──
+CHAT_SCRIPTS.duda_D = [
+  {
+    // Step 0: saudação quente que espelha a energia direta do lead
+    messages: [
+      { text: "oi gatinho 🙈" },
+      { text: "vc apareceu na hora certa, tava louca pra mostrar uma coisa pra alguém 😏" },
+      { text: "tudo bem amor?" },
+    ],
+  },
+  {
+    // Step 1: dá o que ele quer (ver) na hora + já puxa a ligação
+    messages: [
+      { text: "deixa eu te mostrar com quem vc tá falando 🙈" },
+      { image: CHAT_PHOTOS.e6, preDelay: [6, 10] },
+      { text: "gostou? 😏" },
+      { text: "quer me ver ao vivo agora? aqui dá chamada de vídeo" },
+      { text: "posso te ligar amor?" },
+    ],
+  },
+  {
+    // Step 2: chamada
+    action: "call",
+    delay: 5,
+  },
+  {
+    // Step 3: micro-compromisso + espelha o "manda" dele
+    messages: [
+      { text: "me fala... vc quer que eu te mande TUDO agora? meus vídeos e fotos mais safadas 😈" },
+    ],
+  },
+  {
+    // Step 4: fecho com os 3 matadores de objeção (golpe / preço / adiar)
+    messages: [
+      { text: "então é rapidinho amor 🙈", preDelay: [4, 7] },
+      { slideshow: SLIDESHOW_DUDA, preDelay: [3, 5] },
+      { text: "te mando TUDO isso agora + te ligo de novo pra gente continuar 😏", preDelay: [3, 5] },
+      { text: "é só 15 reais no pix, menos que um lanche kkk", preDelay: [3, 5] },
+      { text: "e vc acabou de me ver ao vivo, sabe que sou real ❤️", preDelay: [3, 5] },
+      { text: "manda agora que eu tô aqui pronta te esperando 🔥", preDelay: [3, 5] },
+      { text: "topa? 🙈", preDelay: [3, 5] },
+      { type: "pix", amount: 15.03, description: "Chamada de vídeo ao vivo", preDelay: [1, 1] },
+    ],
+  },
+];
+
+// ── Variante E (copy 5) — IDÊNTICA à copy4, só muda o preço (teste puro de preço): PIX R$10,00 ──
+// Clona a copy4 trocando o valor do PIX e a frase que cita o preço ("15 reais" → "10 reais").
+CHAT_SCRIPTS.duda_E = CHAT_SCRIPTS.duda_D.map(step =>
+  Array.isArray(step.messages)
+    ? { ...step, messages: step.messages.map(m =>
+        m.type === "pix" ? { ...m, amount: 10.00 }
+        : (m.text && m.text.includes("15 reais")) ? { ...m, text: m.text.replace("15 reais", "10 reais") }
+        : m
+      ) }
+    : step
+);
+
+// Resolve o script da conversa, aplicando a variante A/B/C/D/E só na Yasmin (duda)
 export function getChatScript(conversation) {
   if (conversation === "duda") return CHAT_SCRIPTS["duda_" + getVariant()];
   return CHAT_SCRIPTS[conversation];
@@ -399,9 +457,16 @@ export const POST_CALL_SCRIPTS = {
     { text: "fiquei toda arrepiada de te ver rs" },
     { text: "gostou de mim amor? ❤️" },
   ],
+  duda_D: [
+    { text: "viu? sou eu de verdade 🙈" },
+    { text: "ninguém me vê assim ao vivo, só vc rs" },
+    { text: "gostou de mim amor? ❤️" },
+  ],
 };
+// copy5 usa o mesmo pós-chamada da copy4 (teste de preço puro)
+POST_CALL_SCRIPTS.duda_E = POST_CALL_SCRIPTS.duda_D;
 
-// Resolve o pós-chamada, aplicando a variante A/B/C só na Yasmin (duda)
+// Resolve o pós-chamada, aplicando a variante A/B/C/D/E só na Yasmin (duda)
 export function getPostCallScript(conversation) {
   if (conversation === "duda") return POST_CALL_SCRIPTS["duda_" + getVariant()];
   return POST_CALL_SCRIPTS[conversation];
